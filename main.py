@@ -94,7 +94,8 @@ def main() -> None:
     )
 
     model = load_model(args.model, len(train_dataset.classes))
-    model.to(device)
+    model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3]).cuda()
+
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     criterion = nn.CrossEntropyLoss()

@@ -43,7 +43,7 @@ def train_loop(
                     'model_state_dict': model.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
                 },
-                model_save_dir / 'best_model.pt'
+                model_save_dir / 'clf_model.pt'
             )
 
         torch.save(
