@@ -3,11 +3,16 @@ import time
 import cv2
 import onnx
 import numpy as np
+import torch
+import torchvision
 
 from onnxruntime import InferenceSession
+from collections import Counter
 
 
-def main() -> None:
+
+
+def main(chicken_switch: int = 20, frame_for_clf: int = 5) -> None:
 
     preds_list = []
     frame_count = 0
@@ -43,24 +48,31 @@ def main() -> None:
 
         frame_count += 1
 
-        if frame_count % 5 == 0:
+        if frame_count % frame_for_clf == 0:
+
+            #res for camera 1
             result = session.run([output_name], {input_name: frame.transpose(2, 0, 1)[np.newaxis, ...].astype('float32')})
             prediction_cam1 = int(np.argmax(np.array(result).squeeze(), axis=0))
 
-            result = session.run([output_name], {input_name: frame2.transpose(2, 0, 1)[np.newaxis, ...].astype('float32')})
-            prediction_cam2 = int(np.argmax(np.array(result).squeeze(), axis=0))
+            # res for camera 2
+            result2 = session.run([output_name], {input_name: frame2.transpose(2, 0, 1)[np.newaxis, ...].astype('float32')})
+            prediction_cam2 = int(np.argmax(np.array(result2).squeeze(), axis=0))
 
             preds_list.append(prediction_cam1)
             preds_list.append(prediction_cam2)
 
             frame_count = 0
 
-        print(preds_list)
+            print(preds_list)
+
         if len(preds_list) == 10:
-            pred_class = max(preds_list)
-            preds_list.clear()
+
+            pred_class = Counter(preds_list).most_common(1)[0][0]
+
             print('max of preds list:', pred_class)
-            time.sleep(20)
+
+            preds_list.clear()
+            time.sleep(chicken_switch)
 
         if cv2.waitKey(1) == ord('q'):
             break
@@ -73,4 +85,5 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+
+    main(chicken_switch = 20, frame_for_clf= 5)

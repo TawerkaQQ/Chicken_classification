@@ -1,19 +1,11 @@
-from tqdm import tqdm
 import cv2
-import argparse
 import torch
 import pathlib
-import numpy as np
 import os
 import torchvision
-from torchvision import datasets, transforms
 
-# parser = argparse.ArgumentParser(description="Testing trained model")
-# parser.add_argument("--path-to-model", type=str, required= True, help="Path to model")
-# parser.add_argument(
-#     "--path-to-images", type=str, required= True, help="Path to folder with test images"
-# )
-# parser.add_argument("--path-to-save", type=str, required= True, help="Path for processed images")
+from torchvision import datasets, transforms
+from tqdm import tqdm
 
 train_transforms = transforms.Compose(
     [
@@ -24,14 +16,14 @@ train_transforms = transforms.Compose(
 )
 
 
-def apply_model(model):
+def apply_model(model, path_to_data: str):
     acc_model = 0
     all_photo = len(test_loader.dataset)
 
     with torch.no_grad():
 
-        for image in os.listdir('data/test/man'):
-            inputs = cv2.imread(f'data/test/man/{image}')
+        for image in tqdm(os.listdir(path_to_data)):
+            inputs = cv2.imread(f'{path_to_data}/{image}')
             inputs = cv2.resize(inputs, (224, 224))
             inputs = train_transforms(inputs)
 
@@ -68,22 +60,15 @@ def validate_and_load_model(model_path: pathlib.Path):
     return model
 
 
-def test_model(path_to_model: str, images_dir: str, outpur_dir: str) -> None:
-    image_names = os.listdir(images_dir)
-    model = validate_and_load_model(path_to_model)
+# def test_model(path_to_model: str, images_dir: str, outpur_dir: str) -> None:
+#     image_names = os.listdir(images_dir)
+#     model = validate_and_load_model(path_to_model)
+#
+#     for img_name in tqdm(image_names, desc="Testing images"):
+#         if img_name.endswith((".png", ".jpg", ".jpeg")):
+#             collected_img = apply_model()
 
-    for img_name in tqdm(image_names, desc="Testing images"):
-        if img_name.endswith((".png", ".jpg", ".jpeg")):
-            collected_img = apply_model(
-                model,
-                cv2.imread(os.path.join(images_dir, img_name), cv2.IMREAD_GRAYSCALE),
-                256,
-                (768, 1024),
-            )
-            collected_img = cv2.resize(collected_img, (1920, 1080))
-
-            cv2.imwrite(f'{outpur_dir}/{"result" + img_name}', collected_img)
-    return None
+#     return None
 
 
 if __name__ == "__main__":
